@@ -6,9 +6,9 @@ from datetime import timedelta
 from typing import List, Optional
 
 from database import get_db, engine
-from models import Base, User
+from models import Base, User, Customer
 from schemas import (
-    User as UserSchema, UserCreate, Token
+    User as UserSchema, UserCreate, Token, Customer as CustomerSchema
 )
 from auth import (
     authenticate_user, create_access_token, get_current_active_user,
@@ -48,6 +48,43 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("/current_user", response_model=UserSchema)
 async def get_current_user(current_user: User = Depends(get_current_active_user)):
     return current_user
+
+@app.get("/customers", response_model=List[CustomerSchema])
+async def get_customers(
+    skip: int = 0, 
+    limit: int = 100,
+    search: Optional[str] = None,
+    loan_status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    query = db.query(Customer)
+    
+    # Apply filters
+    if search:
+        search_term = search.strip()
+        if search_term:
+            query = query.filter(
+                (Customer.first_name.ilike(f"%{search_term}%")) |
+                (Customer.last_name.ilike(f"%{search_term}%")) |
+                (Customer.email.ilike(f"%{search_term}%"))
+            )
+    
+    if loan_status:
+        query = query.filter(Customer.loan_status == loan_status)
+    
+    return query.offset(skip).limit(limit).all()
+
+@app.get("/customers/{customer_id}", response_model=CustomerSchema)
+async def get_customer(
+    customer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return customer
 
 @app.get("/")
 async def root():

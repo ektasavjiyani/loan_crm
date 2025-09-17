@@ -26,3 +26,24 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+
+class CustomerBase(BaseModel):
+    first_name: str
+    last_name: str
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    loan_amount: Optional[float] = None
+    loan_status: Optional[str] = None
+    interest_rate: Optional[float] = None
+    loan_term_months: Optional[int] = None
+    monthly_payment: Optional[float] = None
+    outstanding_balance: Optional[float] = None
+
+class Customer(CustomerBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
