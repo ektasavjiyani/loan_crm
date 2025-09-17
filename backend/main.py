@@ -6,9 +6,9 @@ from datetime import timedelta
 from typing import List, Optional
 
 from database import get_db, engine
-from models import Base, User, Customer
+from models import Base, User, Customer, Activity
 from schemas import (
-    User as UserSchema, UserCreate, Token, Customer as CustomerSchema
+    User as UserSchema, UserCreate, Token, Customer as CustomerSchema, ActivityCreate, Activity as ActivitySchema
 )
 from auth import (
     authenticate_user, create_access_token, get_current_active_user,
@@ -85,6 +85,26 @@ async def get_customer(
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
+
+@app.get("/customers/{customer_id}/activities", response_model=List[ActivitySchema])
+async def get_customer_activities(
+    customer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    return db.query(Activity).filter(Activity.customer_id == customer_id).order_by(Activity.created_at.desc()).all()
+
+@app.post("/activities", response_model=ActivitySchema)
+async def create_activity(
+    activity: ActivityCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    db_activity = Activity(**activity.dict(), user_id=current_user.id)
+    db.add(db_activity)
+    db.commit()
+    db.refresh(db_activity)
+    return db_activity
 
 @app.get("/")
 async def root():

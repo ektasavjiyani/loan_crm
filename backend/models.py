@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, Text, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "users"
@@ -30,3 +31,20 @@ class Customer(Base):
     outstanding_balance = Column(Float)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    activities = relationship("Activity", back_populates="customer")
+
+
+class Activity(Base):
+    __tablename__ = "activities"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    activity_type = Column(String, nullable=False)  # call, email, note, meeting
+    subject = Column(String)
+    description = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    customer = relationship("Customer", back_populates="activities")
+    user = relationship("User")

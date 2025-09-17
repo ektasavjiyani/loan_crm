@@ -47,3 +47,21 @@ class Customer(CustomerBase):
     
     class Config:
         from_attributes = True
+
+
+class ActivityBase(BaseModel):
+    activity_type: str
+    subject: Optional[str] = None
+    description: Optional[str] = None
+
+class ActivityCreate(ActivityBase):
+    customer_id: int
+
+class Activity(ActivityBase):
+    id: int
+    customer_id: int
+    user_id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
