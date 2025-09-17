@@ -6,15 +6,19 @@ from datetime import timedelta
 from typing import List, Optional
 
 from database import get_db, engine
-from models import Base, User, Customer, Activity
+from models import Base, User, Customer, Activity, Campaign
 from schemas import (
-    User as UserSchema, UserCreate, Token, Customer as CustomerSchema, ActivityCreate, Activity as ActivitySchema
+    User as UserSchema, UserCreate, Token, Customer as CustomerSchema, ActivityCreate, 
+    Activity as ActivitySchema,CampaignRequest
 )
 from auth import (
     authenticate_user, create_access_token, get_current_active_user,
     get_password_hash
 )
 from config import settings
+from ai_service import AIService
+
+
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -29,6 +33,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+ai_service = AIService()
 
 @app.post("/login", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -105,6 +111,35 @@ async def create_activity(
     db.commit()
     db.refresh(db_activity)
     return db_activity
+
+@app.post("/campaigns/create")
+async def create_campaign(
+    request: CampaignRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    customer = db.query(Customer).filter(Customer.id == request.customer_id).first()
+    
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    message = ai_service.generate_campaign_message(customer)
+    
+    db_campaign = Campaign(
+        customer_id=customer.id,
+        user_id=current_user.id,
+        message=message,
+        generated_by_ai=True
+    )
+    db.add(db_campaign)
+    db.commit()
+    db.refresh(db_campaign)
+    
+    return {
+        "message": message,
+        "customer_id": customer.id
+    }
+
 
 @app.get("/")
 async def root():

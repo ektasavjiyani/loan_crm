@@ -65,3 +65,6 @@ class Activity(ActivityBase):
     
     class Config:
         from_attributes = True
+
+class CampaignRequest(BaseModel):
+    customer_id: int

@@ -32,6 +32,7 @@ class Customer(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     activities = relationship("Activity", back_populates="customer")
+    campaigns = relationship("Campaign", back_populates="customer")
 
 
 class Activity(Base):
@@ -44,7 +45,17 @@ class Activity(Base):
     subject = Column(String)
     description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # Relationships
     customer = relationship("Customer", back_populates="activities")
-    user = relationship("User")
+
+
+class Campaign(Base):
+    __tablename__ = "campaigns"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    subject = Column(String)
+    message = Column(Text, nullable=False)
+    generated_by_ai = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    customer = relationship("Customer", back_populates="campaigns")
