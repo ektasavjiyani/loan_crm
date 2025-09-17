@@ -9,7 +9,7 @@ from database import get_db, engine
 from models import Base, User, Customer, Activity, Campaign
 from schemas import (
     User as UserSchema, UserCreate, Token, Customer as CustomerSchema, ActivityCreate, 
-    Activity as ActivitySchema,CampaignRequest
+    Activity as ActivitySchema,CampaignRequest,Campaign as CampaignSchema
 )
 from auth import (
     authenticate_user, create_access_token, get_current_active_user,
@@ -139,6 +139,22 @@ async def create_campaign(
         "message": message,
         "customer_id": customer.id
     }
+
+
+@app.get("/campaign/detail", response_model=CampaignSchema)
+async def get_campaign_data(
+    customer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    query = db.query(Campaign)
+    
+    if customer_id:
+        query = query.filter(Campaign.customer_id == customer_id)
+    else:
+        return "Please provide customer id"
+    
+    return query.first()
 
 
 @app.get("/")

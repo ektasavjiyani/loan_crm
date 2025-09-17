@@ -68,3 +68,15 @@ class Activity(ActivityBase):
 
 class CampaignRequest(BaseModel):
     customer_id: int
+
+class Campaign(BaseModel):
+    id: int
+    customer_id: int
+    message: str
+    user_id: int
+    generated_by_ai: bool
+    created_at: datetime
+    subject: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
