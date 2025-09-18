@@ -25,6 +25,8 @@ class Customer(Base):
     phone = Column(String)
     loan_amount = Column(Float)
     loan_status = Column(String)  # pending, approved, rejected, active, closed
+    risk_score = Column(Integer)
+    overdue_days = Column(Integer, default=0)
     interest_rate = Column(Float)
     loan_term_months = Column(Integer)
     monthly_payment = Column(Float)

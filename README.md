@@ -155,7 +155,8 @@ The frontend will be available at: `http://localhost:8004`
 
 1. Open your web browser and navigate to `http://localhost:8004`
 2. Use the login page to authenticate
-3. Access the dashboard to manage customers and activities
+3. Use the username `admin` and password `admin123` to login
+4. Access the dashboard to manage customers and activities
 
 ## API Documentation
 
@@ -245,3 +246,8 @@ loan_crm/
 - Backend logs are displayed in the terminal where `uvicorn` is running
 - Frontend errors can be viewed in the browser's developer console
 - Database queries can be debugged by enabling SQLAlchemy logging
+
+### Limitations
+
+- If time allowed I could implement filter with risk score and overdue date
+- I could also implement bonus points

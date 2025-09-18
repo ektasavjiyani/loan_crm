@@ -16,7 +16,8 @@ $(document).ready(function() {
         $('#error-alert').addClass('hidden');
         
         try {
-            const result = await login(username, password);
+            const hashedPassword = await hashPassword(password);
+            const result = await login(username, hashedPassword);
             
             if (result.success) {
                 window.location.href = 'dashboard.html';
@@ -36,5 +37,14 @@ $(document).ready(function() {
     function showError(message) {
         $('#error-message').text(message);
         $('#error-alert').removeClass('hidden');
+    }
+
+    async function hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        console.log(hashArray.map(b => b.toString(16).padStart(2, "0")).join(""));
+        return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
     }
 });

@@ -35,6 +35,8 @@ class CustomerBase(BaseModel):
     phone: Optional[str] = None
     loan_amount: Optional[float] = None
     loan_status: Optional[str] = None
+    risk_score: Optional[int] = None
+    overdue_days: Optional[int] = None
     interest_rate: Optional[float] = None
     loan_term_months: Optional[int] = None
     monthly_payment: Optional[float] = None

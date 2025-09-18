@@ -9,6 +9,7 @@ from database import get_db
 from models import User
 from schemas import TokenData
 from config import settings
+import hashlib
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -16,8 +17,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def sha256_hex(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def get_password_hash(password: str):
+    client_sha256_hex = sha256_hex(password)
+    return pwd_context.hash(client_sha256_hex)  # bcrypt of sha256
 
 def get_user(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()

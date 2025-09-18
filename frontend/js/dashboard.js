@@ -55,6 +55,7 @@ $(document).ready(function() {
             };
 
             customers = await getCustomers(params);
+            console.log(customers);
             renderCustomerTable();
             updatePagination();
         } catch (error) {
@@ -82,6 +83,7 @@ $(document).ready(function() {
 
         customers.forEach(customer => {
             const statusColor = getStatusColor(customer.loan_status);
+            const riskColor = getRiskColor(customer.risk_score);
             
             tbody.append(`
                 <tr class="hover:bg-gray-50">
@@ -98,6 +100,17 @@ $(document).ready(function() {
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColor}">
                             ${customer.loan_status}
                         </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${riskColor}">
+                            ${customer.risk_score || 'N/A'}/100
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${customer.overdue_days > 0 ? 
+                            `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">${customer.overdue_days} days</span>` : 
+                            '<span class="text-sm text-gray-900">0</span>'
+                        }
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">${formatCurrency(customer.outstanding_balance)}</div>
@@ -410,6 +423,18 @@ $(document).ready(function() {
             closed: 'bg-gray-100 text-gray-800',
         };
         return colors[status.toLowerCase()] || 'bg-gray-100 text-gray-800';
+    }
+
+    function getRiskColor(riskScore) {
+        if (!riskScore || riskScore === null) return 'bg-gray-100 text-gray-800';
+        
+        if (riskScore >= 80) {
+            return 'bg-green-100 text-green-800'; // Low risk (excellent)
+        } else if (riskScore >= 60) {
+            return 'bg-yellow-100 text-yellow-800'; // Medium risk (good)
+        } else {
+            return 'bg-red-100 text-red-800'; // High risk (needs attention)
+        }
     }
 
 
