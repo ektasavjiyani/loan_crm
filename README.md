@@ -92,7 +92,7 @@ cd backend
 
 2. Create a virtual environment:
 ```bash
-python -m venv venv
+python3 -m venv venv
 ```
 
 3. Activate the virtual environment:
@@ -146,7 +146,7 @@ The backend API will be available at: `http://localhost:8003`
 ### 2. Start the Frontend Server
 ```bash
 cd frontend
-python server.py
+python3 server.py 
 ```
 
 The frontend will be available at: `http://localhost:8004`
